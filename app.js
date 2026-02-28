@@ -219,4 +219,92 @@ pricingCards.addEventListener("click", (e) => {
   scrollToId("signup");
 });
 
+/* 7. Form validation (bonus) */
 
+function setError(fieldName, message) {
+  const el = document.querySelector(`[data-error-for="${fieldName}"]`);
+  if (el) el.textContent = message || "";
+}
+
+function isValidEmail(email) {
+  const normalized = String(email || "").trim();
+
+  // Practical baseline check:
+  // - one @
+  // - no spaces
+  // - at least one dot in the domain
+  // - at least 2 chars after final dot
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(normalized)) return false;
+
+  // Quick guard against obvious invalid formats like "a..b@example.com"
+  if (normalized.includes("..")) return false;
+
+  return true;
+}
+
+function validate(values) {
+  let ok = true;
+
+  //validate name
+  if (!values.name || values.name.trim().length < 2) {
+    setError("name", "Please enter a valid name (at least 2 characters).");
+    ok = false;
+  } else {
+    setError("name");
+  }
+
+  //validate email
+  if (!isValidEmail(values.email)) {
+    setError("email", "Please enter a valid email address.");
+    ok = false;
+  } else {
+    setError("email");
+  }
+
+  //validate track selected
+  if (!values.track) {
+    setError("track", "Please select a track.");
+    ok = false;
+  } else {
+    setError("track");
+  }
+
+  return ok;
+}
+
+signupForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  formMsg.textContent = ""; // Clear any previous messages
+
+  const values = {
+    name: signupForm.name.value.trim(),
+    email: signupForm.email.value.trim(),
+    track: signupForm.track.value,
+  };
+
+  if (!validate(values)) return;
+
+  // If validation passes, show a success message
+  formMsg.textContent = `Thanks for signing up, ${values.name}! We’ll be in touch at ${values.email}.`;
+  signupForm.reset(); // Clear the form
+});
+
+/* 8. Current 'live' user counter (bonus) */
+
+function startLiveUsersTicker() {
+  const liveUsers = document.getElementById("liveUsers");
+  if (!liveUsers) return;
+
+  setInterval(() => {
+    const current = Number(liveUsers.textContent) || 0;
+    const delta = Math.random() > 0.5 ? 1 : -1;
+    const next = Math.max(80, current + delta);
+    liveUsers.textContent = String(next);
+  }, 1500);
+}
+
+/* 9. Initialization (Boot) function */
+
+loadPref(); // Load any saved preferences from localStorage
+renderAll(); // Render the UI based on the current state
+startLiveUsersTicker(); // Start the live user counter
